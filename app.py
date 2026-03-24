@@ -26,13 +26,17 @@ defaults = dict(
     generated_xlsx=None,    # bytes of last generated workbook
     preset_name=list(SIZE_PRESETS.keys())[0],
     custom_w=2.0, custom_h=1.0,
+    # style
+    orange_color='#FF8000',
+    price_color='#111111',
+    text_color='#111111',
+    font_size_scale=1.0,
     # field toggles — all core features on by default
     show_unit_price=True, show_uom=True, show_date=True,
     show_special=True, show_multibuy=True, show_item_num=True,
     show_upc=True, show_size=True, show_pack=True,
     show_desc=True, show_barcode=True,
     show_snap=True, show_wic=True,
-    orange_color='#FF8000',
 )
 for k, v in defaults.items():
     if k not in st.session_state:
@@ -126,7 +130,19 @@ elif step == 2:
     with left:
         st.subheader('⚙️  Configure')
 
-        # Size
+        # ── Style (top) ────────────────────────────────────────────────────────
+        st.markdown('**🎨 Style**')
+        s1, s2 = st.columns(2)
+        with s1: st.color_picker('Box color',   key='orange_color')
+        with s2: st.color_picker('Price color', key='price_color')
+        s3, s4 = st.columns(2)
+        with s3: st.color_picker('Text color',  key='text_color')
+        with s4: st.slider('Font size', 0.75, 1.5, key='font_size_scale', step=0.05,
+                           format='%.2fx')
+
+        st.divider()
+
+        # ── Label size ─────────────────────────────────────────────────────────
         st.markdown('**📐 Label stock size**')
         preset_names = list(SIZE_PRESETS.keys())
         st.radio(
@@ -137,12 +153,12 @@ elif step == 2:
         )
         if SIZE_PRESETS[st.session_state.preset_name] is None:
             cw, ch = st.columns(2)
-            with cw: st.number_input('Width (in)',  1.0, 6.0, st.session_state.custom_w, 0.25, key='custom_w')
-            with ch: st.number_input('Height (in)', 0.5, 4.0, st.session_state.custom_h, 0.25, key='custom_h')
+            with cw: st.number_input('Width (in)',  1.0, 6.0, step=0.25, key='custom_w')
+            with ch: st.number_input('Height (in)', 0.5, 4.0, step=0.25, key='custom_h')
 
         st.divider()
 
-        # Fields
+        # ── Fields ─────────────────────────────────────────────────────────────
         st.markdown('**📋 Fields to include**')
 
         st.markdown('<p style="font-size:12px;color:#888;margin-bottom:4px">🟠 Unit price box</p>', unsafe_allow_html=True)
@@ -173,12 +189,6 @@ elif step == 2:
         with fl: st.checkbox('WIC',        key='show_wic',  help='Wicable = 1')
 
         st.divider()
-
-        # Style
-        st.markdown('**🎨 Style**')
-        st.color_picker('Unit price box color', key='orange_color')
-
-        st.divider()
         if st.button('← Back to Upload', use_container_width=True):
             go(1); st.rerun()
 
@@ -191,23 +201,27 @@ elif step == 2:
         else:
             lw, lh = st.session_state.custom_w, st.session_state.custom_h
 
+        ss = st.session_state   # shorthand — always reflects current widget state
         cfg = build_config(
             label_width_in    = lw,
             label_height_in   = lh,
-            show_unit_price   = st.session_state.show_unit_price,
-            show_uom          = st.session_state.show_uom,
-            show_date         = st.session_state.show_date,
-            show_special_price= st.session_state.show_special,
-            show_multibuy     = st.session_state.show_multibuy,
-            show_item_number  = st.session_state.show_item_num,
-            show_upc          = st.session_state.show_upc,
-            show_size         = st.session_state.show_size,
-            show_pack         = st.session_state.show_pack,
-            show_description  = st.session_state.show_desc,
-            show_barcode      = st.session_state.show_barcode,
-            show_snap_badge   = st.session_state.show_snap,
-            show_wic_badge    = st.session_state.show_wic,
-            orange_hex        = st.session_state.orange_color.lstrip('#'),
+            show_unit_price   = ss.show_unit_price,
+            show_uom          = ss.show_uom,
+            show_date         = ss.show_date,
+            show_special_price= ss.show_special,
+            show_multibuy     = ss.show_multibuy,
+            show_item_number  = ss.show_item_num,
+            show_upc          = ss.show_upc,
+            show_size         = ss.show_size,
+            show_pack         = ss.show_pack,
+            show_description  = ss.show_desc,
+            show_barcode      = ss.show_barcode,
+            show_snap_badge   = ss.show_snap,
+            show_wic_badge    = ss.show_wic,
+            orange_hex        = ss.orange_color.lstrip('#'),
+            price_color       = ss.price_color.lstrip('#'),
+            text_color        = ss.text_color.lstrip('#'),
+            font_size_scale   = float(ss.font_size_scale),
         )
 
         st.subheader('Live preview')
