@@ -14,8 +14,13 @@ from openpyxl.utils import get_column_letter
 from openpyxl.drawing.image import Image as XLImage
 import pandas as pd
 from datetime import datetime
-import barcode
-from barcode.writer import ImageWriter
+try:
+    import barcode
+    from barcode.writer import ImageWriter
+    HAS_BARCODE = True
+except ImportError:
+    HAS_BARCODE = False
+
 import os, tempfile
 
 # ── Constants ─────────────────────────────────────────────────────────────────
@@ -60,7 +65,16 @@ def build_config(
     # Style
     orange_hex        = 'FF8000',
 ):
-    return dict(locals())   # capture all kwargs as dict
+    return dict(
+        label_width_in=label_width_in, label_height_in=label_height_in,
+        show_unit_price=show_unit_price, show_uom=show_uom, show_date=show_date,
+        show_special_price=show_special_price, show_multibuy=show_multibuy,
+        show_item_number=show_item_number, show_upc=show_upc,
+        show_size=show_size, show_pack=show_pack,
+        show_description=show_description, show_barcode=show_barcode,
+        show_snap_badge=show_snap_badge, show_wic_badge=show_wic_badge,
+        orange_hex=orange_hex,
+    )
 
 DEFAULT_CONFIG = build_config()
 
@@ -122,6 +136,8 @@ def clean_size(raw):
     except ValueError: return s
 
 def make_barcode(upc_raw):
+    if not HAS_BARCODE:
+        return None
     digits = ''.join(filter(str.isdigit, str(upc_raw)))
     if not digits: return None
     path = os.path.join(BC_DIR, f'{digits}.png')
