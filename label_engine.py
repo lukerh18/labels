@@ -63,7 +63,10 @@ def build_config(
     show_snap_badge   = True,    # SNAP / EBT eligible  (Foodstamp=TRUE)
     show_wic_badge    = True,    # WIC eligible  (Wicable=1)
     # Style
-    orange_hex        = 'FF8000',
+    orange_hex        = 'FF8000',   # background of unit-price box
+    price_color       = '111111',   # main retail/special price text
+    text_color        = '111111',   # general label text
+    font_size_scale   = 1.0,        # multiplier for all font sizes (0.75–1.5)
 ):
     return dict(
         label_width_in=label_width_in, label_height_in=label_height_in,
@@ -74,6 +77,9 @@ def build_config(
         show_description=show_description, show_barcode=show_barcode,
         show_snap_badge=show_snap_badge, show_wic_badge=show_wic_badge,
         orange_hex=orange_hex,
+        price_color=price_color,
+        text_color=text_color,
+        font_size_scale=font_size_scale,
     )
 
 DEFAULT_CONFIG = build_config()
@@ -82,11 +88,14 @@ DEFAULT_CONFIG = build_config()
 BASE_ROW_H = [8, 22, 10, 12, 16, 4]   # pt — sums to 72pt = 1 inch
 
 def get_layout(cfg):
-    sw = cfg['label_width_in']  / 2.0
-    sh = cfg['label_height_in'] / 1.0
+    sw  = cfg['label_width_in']  / 2.0
+    sh  = cfg['label_height_in'] / 1.0
+    fsc = cfg.get('font_size_scale', 1.0)
     total_pt = int(cfg['label_height_in'] * 72)
     row_h = [max(4, round(h * total_pt / sum(BASE_ROW_H))) for h in BASE_ROW_H]
     row_h[-1] += total_pt - sum(row_h)
+
+    def fs(base): return max(4, round(base * fsc))
 
     return dict(
         row_h          = row_h,
@@ -95,15 +104,15 @@ def get_layout(cfg):
         gap_chars      = max(2,  round(3  * sw)),
         labels_per_row = max(1, int(10.5 / cfg['label_width_in'])),
         rows_per_label = len(BASE_ROW_H),
-        fs_hdr         = max(5,  round(5.5 * sh)),
-        fs_unit_price  = max(8,  round(11  * sh)),
-        fs_uom         = max(5,  round(6.5 * sh)),
-        fs_retail      = max(16, round(22  * sh)),
-        fs_was         = max(5,  round(7   * sh)),
-        fs_sub         = max(4,  round(5.5 * sh)),
-        fs_detail      = max(4,  round(6   * sh)),
-        fs_desc        = max(5,  round(6.5 * sh)),
-        fs_badge       = max(4,  round(5   * sh)),
+        fs_hdr         = fs(max(5,  round(5.5 * sh))),
+        fs_unit_price  = fs(max(8,  round(11  * sh))),
+        fs_uom         = fs(max(5,  round(6.5 * sh))),
+        fs_retail      = fs(max(16, round(22  * sh))),
+        fs_was         = fs(max(5,  round(7   * sh))),
+        fs_sub         = fs(max(4,  round(5.5 * sh))),
+        fs_detail      = fs(max(4,  round(6   * sh))),
+        fs_desc        = fs(max(5,  round(6.5 * sh))),
+        fs_badge       = fs(max(4,  round(5   * sh))),
     )
 
 # ── Data helpers ──────────────────────────────────────────────────────────────
@@ -235,28 +244,33 @@ def extract_item_data(item, cfg):
 def render_label_html(item, cfg):
     """Returns an HTML string visually representing the label using real item data."""
     d = extract_item_data(item, cfg)
-    orange = f'#{cfg["orange_hex"]}'
+    orange      = f'#{cfg["orange_hex"]}'
+    price_color = f'#{cfg.get("price_color", "111111")}'
+    text_color  = f'#{cfg.get("text_color",  "111111")}'
+    fsc = cfg.get('font_size_scale', 1.0)
+
+    def fpx(base_px): return f'{max(7, round(base_px * fsc))}px'
 
     # Right-col sub line: multi-buy > item# > blank
     if d['use_special']:
-        sub_right = f'<span style="font-size:9px;color:#555555">WAS ${d["price"]:.2f}'
+        sub_right = f'<span style="font-size:{fpx(9)};color:#777777">WAS ${d["price"]:.2f}'
         if cfg['show_item_number'] and d['item_code']:
             sub_right += f'&nbsp;&nbsp;Item #{d["item_code"]}'
         sub_right += '</span>'
     elif d['mb_qty']:
-        sub_right = f'<span style="font-size:9px;color:#111111;font-weight:bold">{d["mb_qty"]} FOR ${d["mb_price"]:.2f}</span>'
+        sub_right = f'<span style="font-size:{fpx(9)};color:{text_color};font-weight:bold">{d["mb_qty"]} FOR ${d["mb_price"]:.2f}</span>'
     elif cfg['show_item_number'] and d['item_code']:
-        sub_right = f'<span style="font-size:9px;color:#555555">Item #: {d["item_code"]}</span>'
+        sub_right = f'<span style="font-size:{fpx(9)};color:#777777">Item #: {d["item_code"]}</span>'
     else:
         sub_right = ''
 
     # Price display
     if d['use_special']:
-        price_html = f'<span style="color:#CC0000;font-size:1.5em;font-weight:bold">${d["special_val"]:.2f}</span>'
-        price_hdr  = '<span style="color:#CC0000;font-size:9px">SPECIAL PRICE</span>'
+        price_html = f'<span style="color:#CC0000;font-size:{fpx(20)};font-weight:bold">${d["special_val"]:.2f}</span>'
+        price_hdr  = f'<span style="color:#CC0000;font-size:{fpx(9)}">SPECIAL PRICE</span>'
     else:
-        price_html = f'<span style="color:#111111;font-size:1.5em;font-weight:bold">${d["price"]:.2f}</span>'
-        price_hdr  = '<span style="color:#444444;font-size:9px">RETAIL PRICE</span>'
+        price_html = f'<span style="color:{price_color};font-size:{fpx(20)};font-weight:bold">${d["price"]:.2f}</span>'
+        price_hdr  = f'<span style="color:#888888;font-size:{fpx(9)}">RETAIL PRICE</span>'
 
     # UPC + size + pack detail line
     detail_parts = []
@@ -268,55 +282,55 @@ def render_label_html(item, cfg):
     # Badges
     badges = ''
     if cfg['show_snap_badge'] and d['snap']:
-        badges += '<span style="background:#2E7D32;color:white;font-size:8px;padding:1px 3px;border-radius:2px;margin-right:2px">SNAP/EBT</span>'
+        badges += f'<span style="background:#2E7D32;color:#ffffff;font-size:{fpx(8)};padding:1px 3px;border-radius:2px;margin-right:2px">SNAP/EBT</span>'
     if cfg['show_wic_badge'] and d['wic']:
-        badges += '<span style="background:#1565C0;color:white;font-size:8px;padding:1px 3px;border-radius:2px">WIC</span>'
+        badges += f'<span style="background:#1565C0;color:#ffffff;font-size:{fpx(8)};padding:1px 3px;border-radius:2px">WIC</span>'
 
     # Orange box content
     orange_lines = []
     if cfg['show_unit_price']:
-        orange_lines.append('<span style="font-size:9px">UNIT PRICE</span>')
+        orange_lines.append(f'<span style="font-size:{fpx(9)};color:#ffffff">UNIT PRICE</span>')
         val = f'${d["price_per"]:.2f}' if d['price_per'] is not None else 'N/A'
-        orange_lines.append(f'<b style="font-size:1.1em">{val}</b>')
+        orange_lines.append(f'<b style="font-size:{fpx(13)};color:#ffffff">{val}</b>')
     if cfg['show_uom']:
-        orange_lines.append(f'<span style="font-size:8px">{d["uom"]}</span>')
+        orange_lines.append(f'<span style="font-size:{fpx(8)};color:#ffffff">{d["uom"]}</span>')
 
     html = f"""
-    <div style="font-family:Arial,sans-serif;font-size:11px;border:2px solid #444;
+    <div style="font-family:Arial,sans-serif;font-size:{fpx(11)};border:2px solid #444444;
                 width:100%;display:flex;flex-direction:column;min-height:80px;
-                background:#ffffff;color:#111111;">
+                background:#ffffff;color:{text_color};">
       <!-- Top: orange box + price area -->
       <div style="display:flex;flex:1;">
         <div style="background:{orange};color:#ffffff;width:38%;
                     display:flex;flex-direction:column;align-items:center;
                     justify-content:center;text-align:center;padding:4px 2px;
-                    gap:1px;border-right:1px solid #aaa;">
+                    gap:1px;border-right:1px solid #aaaaaa;">
           {'<br>'.join(orange_lines) if orange_lines else ''}
         </div>
         <div style="width:62%;display:flex;flex-direction:column;
                     align-items:center;justify-content:center;
-                    padding:4px;text-align:center;gap:1px;color:#111111;">
+                    padding:4px;text-align:center;gap:1px;color:{text_color};">
           {price_hdr}
           {price_html}
           {sub_right}
         </div>
       </div>
       <!-- Date / UPC row -->
-      <div style="display:flex;border-top:1px solid #ddd;font-size:9px;
-                  padding:2px 4px;min-height:14px;color:#111111;">
-        <div style="width:38%;color:#555555;text-align:center;">
+      <div style="display:flex;border-top:1px solid #dddddd;font-size:{fpx(9)};
+                  padding:2px 4px;min-height:14px;color:{text_color};">
+        <div style="width:38%;color:#777777;text-align:center;">
           {''+d['date_lbl'] if cfg['show_date'] else ''}
         </div>
-        <div style="width:62%;text-align:center;color:#555555;">{detail_str}</div>
+        <div style="width:62%;text-align:center;color:#777777;">{detail_str}</div>
       </div>
       <!-- Description / barcode row -->
-      <div style="display:flex;border-top:1px solid #555;padding:2px 4px;
-                  min-height:16px;align-items:center;color:#111111;">
-        <div style="width:60%;font-size:9px;font-weight:bold;color:#111111;">
+      <div style="display:flex;border-top:1px solid #555555;padding:2px 4px;
+                  min-height:16px;align-items:center;color:{text_color};">
+        <div style="width:60%;font-size:{fpx(9)};font-weight:bold;color:{text_color};">
           {(d['desc'][:30] + ('&nbsp;' + badges if badges else '')) if cfg['show_description'] else (badges if badges else '')}
         </div>
-        <div style="width:40%;text-align:right;font-size:9px;
-                    letter-spacing:-1.5px;color:#333333;">
+        <div style="width:40%;text-align:right;font-size:{fpx(9)};
+                    letter-spacing:-1.5px;color:#555555;">
           {'▌▌▌▏▌▌▌▌▌▏▌▌▌▌▌' if cfg['show_barcode'] else ''}
         </div>
       </div>
@@ -356,16 +370,19 @@ def draw_label(ws, r, oc, item, cfg, layout):
         c.value=val; c.font=Font(name='Arial',size=sz,bold=bold,color=color)
         c.alignment=Alignment(horizontal='center',vertical='center')
 
+    pc_color = cfg.get('price_color', '111111')
+    tx_color = cfg.get('text_color',  '111111')
+
     # Row 0 — headers
     oc_set(r,   'UNIT PRICE' if cfg['show_unit_price'] else '', layout['fs_hdr'])
     if d['use_special']: pc_set(r, 'SPECIAL PRICE', layout['fs_hdr'], color='CC0000')
-    else:                pc_set(r, 'RETAIL PRICE',  layout['fs_hdr'])
+    else:                pc_set(r, 'RETAIL PRICE',  layout['fs_hdr'], color='888888')
 
     # Row 1 — main prices
     oc_set(r+1, (f'${d["price_per"]:.2f}' if d['price_per'] is not None else 'N/A')
                 if cfg['show_unit_price'] else '', layout['fs_unit_price'], bold=True)
     if d['use_special']: pc_set(r+1, f'${d["special_val"]:.2f}', layout['fs_retail'], bold=True, color='CC0000')
-    else:                pc_set(r+1, f'${d["price"]:.2f}',        layout['fs_retail'], bold=True)
+    else:                pc_set(r+1, f'${d["price"]:.2f}',        layout['fs_retail'], bold=True, color=pc_color)
 
     # Row 2 — UOM | multi-buy / item# / "WAS"
     oc_set(r+2, d['uom'] if cfg['show_uom'] else '', layout['fs_uom'], bold=True)
