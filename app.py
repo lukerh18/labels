@@ -165,33 +165,33 @@ elif step == 2:
 
     with c1:
         st.markdown('**🟠 Unit Price Box**')
-        st.session_state.show_unit_price = st.checkbox('Unit price',        st.session_state.show_unit_price)
-        st.session_state.show_uom        = st.checkbox('Unit of measure',   st.session_state.show_uom,
-                                                        help='e.g. PER POUND, PER OUNCE')
-        st.session_state.show_date       = st.checkbox('Date',              st.session_state.show_date)
+        st.checkbox('Unit price',       key='show_unit_price')
+        st.checkbox('Unit of measure',  key='show_uom',
+                    help='e.g. PER POUND, PER OUNCE')
+        st.checkbox('Date',             key='show_date')
 
     with c2:
         st.markdown('**💲 Price Area**')
         st.caption('Retail price is always shown.')
-        st.session_state.show_special   = st.checkbox('Special / sale price', st.session_state.show_special,
-                                                       help='Items with an active SpecialPrice show in red. Regular price becomes "WAS $X.XX".')
-        st.session_state.show_multibuy  = st.checkbox('Multi-buy price',      st.session_state.show_multibuy,
-                                                       help='Shows "2 FOR $5.00" when GroupPrice and Quantity are set.')
-        st.session_state.show_item_num  = st.checkbox('Vendor item number',   st.session_state.show_item_num)
-        st.session_state.show_upc       = st.checkbox('UPC number',           st.session_state.show_upc)
-        st.session_state.show_size      = st.checkbox('Size / weight',        st.session_state.show_size)
-        st.session_state.show_pack      = st.checkbox('Pack count',           st.session_state.show_pack,
-                                                       help='e.g. "24-pack" from the Pack field.')
+        st.checkbox('Special / sale price', key='show_special',
+                    help='Items with an active SpecialPrice show in red. Regular price becomes "WAS $X.XX".')
+        st.checkbox('Multi-buy price',      key='show_multibuy',
+                    help='Shows "2 FOR $5.00" when GroupPrice and Quantity are set.')
+        st.checkbox('Vendor item number',   key='show_item_num')
+        st.checkbox('UPC number',           key='show_upc')
+        st.checkbox('Size / weight',        key='show_size')
+        st.checkbox('Pack count',           key='show_pack',
+                    help='e.g. "24-pack" from the Pack field.')
 
     with c3:
         st.markdown('**📋 Bottom Bar**')
-        st.session_state.show_desc    = st.checkbox('Item description',   st.session_state.show_desc)
-        st.session_state.show_barcode = st.checkbox('Barcode',            st.session_state.show_barcode)
+        st.checkbox('Item description', key='show_desc')
+        st.checkbox('Barcode',          key='show_barcode')
         st.markdown('**🏷 Compliance Badges**')
-        st.session_state.show_snap = st.checkbox('SNAP / EBT badge', st.session_state.show_snap,
-                                                  help='Green badge on items where Foodstamp = TRUE.')
-        st.session_state.show_wic  = st.checkbox('WIC badge',        st.session_state.show_wic,
-                                                  help='Blue badge on items where Wicable = 1.')
+        st.checkbox('SNAP / EBT badge', key='show_snap',
+                    help='Green badge on items where Foodstamp = TRUE.')
+        st.checkbox('WIC badge',        key='show_wic',
+                    help='Blue badge on items where Wicable = 1.')
 
     st.divider()
 
