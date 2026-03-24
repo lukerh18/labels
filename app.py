@@ -211,22 +211,27 @@ elif step == 2:
         )
 
         st.subheader('Live preview')
-        st.caption(f'Showing up to 4 items from your first file · {lw}" × {lh}" labels · updates as you configure')
+        st.caption(f'{lw}" × {lh}" · updates instantly as you configure')
 
-        PREVIEW_COUNT = 4
-        all_items = []
+        preview_item = None
         if st.session_state.file_bytes:
-            _, raw0 = st.session_state.file_bytes[0]
-            df0 = pd.read_csv(io.BytesIO(raw0), dtype=READ_DTYPES)
-            if 'Active' in df0.columns:
-                df0 = df0[df0['Active'].astype(str).str.strip().str.upper() != 'FALSE']
-            all_items = df0.head(PREVIEW_COUNT).to_dict('records')
+            try:
+                _, raw0 = st.session_state.file_bytes[0]
+                df0 = pd.read_csv(io.BytesIO(raw0), dtype=READ_DTYPES)
+                if 'Active' in df0.columns:
+                    df0 = df0[df0['Active'].astype(str).str.strip().str.upper() != 'FALSE']
+                if not df0.empty:
+                    preview_item = df0.iloc[0].to_dict()
+            except Exception:
+                pass
 
-        if all_items:
-            prev_cols = st.columns(2)
-            for i, item in enumerate(all_items):
-                with prev_cols[i % 2]:
-                    st.html(render_label_html(item, cfg))
+        if preview_item is not None:
+            _, center, _ = st.columns([1, 2, 1])
+            with center:
+                try:
+                    st.html(render_label_html(preview_item, cfg))
+                except Exception as e:
+                    st.error(f'Preview error: {e}')
         else:
             st.warning('No items to preview — check your upload.')
 
