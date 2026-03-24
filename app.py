@@ -161,32 +161,33 @@ elif step == 2:
         # ── Fields ─────────────────────────────────────────────────────────────
         st.markdown('**📋 Fields to include**')
 
+        ss = st.session_state
         st.markdown('<p style="font-size:12px;color:#888;margin-bottom:4px">🟠 Unit price box</p>', unsafe_allow_html=True)
         fa, fb = st.columns(2)
-        with fa: st.checkbox('Unit price',      key='show_unit_price')
-        with fb: st.checkbox('Unit of measure', key='show_uom')
-        st.checkbox('Date', key='show_date')
+        with fa: st.checkbox('Unit price',      value=ss.show_unit_price, key='show_unit_price')
+        with fb: st.checkbox('Unit of measure', value=ss.show_uom,        key='show_uom')
+        st.checkbox('Date', value=ss.show_date, key='show_date')
 
         st.markdown('<p style="font-size:12px;color:#888;margin:8px 0 4px">💲 Price area</p>', unsafe_allow_html=True)
         fc, fd = st.columns(2)
-        with fc: st.checkbox('Special / sale',  key='show_special',  help='Items with an active SpecialPrice show in red.')
-        with fd: st.checkbox('Multi-buy',       key='show_multibuy', help='e.g. "2 FOR $5.00"')
+        with fc: st.checkbox('Special / sale',  value=ss.show_special,  key='show_special',  help='Items with an active SpecialPrice show in red.')
+        with fd: st.checkbox('Multi-buy',       value=ss.show_multibuy, key='show_multibuy', help='e.g. "2 FOR $5.00"')
         fe, ff = st.columns(2)
-        with fe: st.checkbox('Item number',     key='show_item_num')
-        with ff: st.checkbox('UPC',             key='show_upc')
+        with fe: st.checkbox('Item number',     value=ss.show_item_num, key='show_item_num')
+        with ff: st.checkbox('UPC',             value=ss.show_upc,      key='show_upc')
         fg, fh = st.columns(2)
-        with fg: st.checkbox('Size / weight',   key='show_size')
-        with fh: st.checkbox('Pack count',      key='show_pack', help='e.g. "24-pack"')
+        with fg: st.checkbox('Size / weight',   value=ss.show_size,     key='show_size')
+        with fh: st.checkbox('Pack count',      value=ss.show_pack,     key='show_pack', help='e.g. "24-pack"')
 
         st.markdown('<p style="font-size:12px;color:#888;margin:8px 0 4px">📋 Bottom bar</p>', unsafe_allow_html=True)
         fi, fj = st.columns(2)
-        with fi: st.checkbox('Description',     key='show_desc')
-        with fj: st.checkbox('Barcode',         key='show_barcode')
+        with fi: st.checkbox('Description', value=ss.show_desc,    key='show_desc')
+        with fj: st.checkbox('Barcode',     value=ss.show_barcode, key='show_barcode')
 
         st.markdown('<p style="font-size:12px;color:#888;margin:8px 0 4px">🏷 Badges</p>', unsafe_allow_html=True)
         fk, fl = st.columns(2)
-        with fk: st.checkbox('SNAP / EBT', key='show_snap', help='Foodstamp = TRUE')
-        with fl: st.checkbox('WIC',        key='show_wic',  help='Wicable = 1')
+        with fk: st.checkbox('SNAP / EBT', value=ss.show_snap, key='show_snap', help='Foodstamp = TRUE')
+        with fl: st.checkbox('WIC',        value=ss.show_wic,  key='show_wic',  help='Wicable = 1')
 
         st.divider()
         if st.button('← Back to Upload', use_container_width=True):
