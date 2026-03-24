@@ -239,14 +239,14 @@ def render_label_html(item, cfg):
 
     # Right-col sub line: multi-buy > item# > blank
     if d['use_special']:
-        sub_right = f'<span style="font-size:9px">WAS ${d["price"]:.2f}'
+        sub_right = f'<span style="font-size:9px;color:#555555">WAS ${d["price"]:.2f}'
         if cfg['show_item_number'] and d['item_code']:
             sub_right += f'&nbsp;&nbsp;Item #{d["item_code"]}'
         sub_right += '</span>'
     elif d['mb_qty']:
-        sub_right = f'<span style="font-size:9px">{d["mb_qty"]} FOR ${d["mb_price"]:.2f}</span>'
+        sub_right = f'<span style="font-size:9px;color:#111111;font-weight:bold">{d["mb_qty"]} FOR ${d["mb_price"]:.2f}</span>'
     elif cfg['show_item_number'] and d['item_code']:
-        sub_right = f'<span style="font-size:9px">Item #: {d["item_code"]}</span>'
+        sub_right = f'<span style="font-size:9px;color:#555555">Item #: {d["item_code"]}</span>'
     else:
         sub_right = ''
 
@@ -255,8 +255,8 @@ def render_label_html(item, cfg):
         price_html = f'<span style="color:#CC0000;font-size:1.5em;font-weight:bold">${d["special_val"]:.2f}</span>'
         price_hdr  = '<span style="color:#CC0000;font-size:9px">SPECIAL PRICE</span>'
     else:
-        price_html = f'<span style="font-size:1.5em;font-weight:bold">${d["price"]:.2f}</span>'
-        price_hdr  = '<span style="font-size:9px">RETAIL PRICE</span>'
+        price_html = f'<span style="color:#111111;font-size:1.5em;font-weight:bold">${d["price"]:.2f}</span>'
+        price_hdr  = '<span style="color:#444444;font-size:9px">RETAIL PRICE</span>'
 
     # UPC + size + pack detail line
     detail_parts = []
@@ -284,10 +284,10 @@ def render_label_html(item, cfg):
     html = f"""
     <div style="font-family:Arial,sans-serif;font-size:11px;border:2px solid #444;
                 width:100%;display:flex;flex-direction:column;min-height:80px;
-                background:white;">
+                background:#ffffff;color:#111111;">
       <!-- Top: orange box + price area -->
       <div style="display:flex;flex:1;">
-        <div style="background:{orange};color:white;width:38%;
+        <div style="background:{orange};color:#ffffff;width:38%;
                     display:flex;flex-direction:column;align-items:center;
                     justify-content:center;text-align:center;padding:4px 2px;
                     gap:1px;border-right:1px solid #aaa;">
@@ -295,7 +295,7 @@ def render_label_html(item, cfg):
         </div>
         <div style="width:62%;display:flex;flex-direction:column;
                     align-items:center;justify-content:center;
-                    padding:4px;text-align:center;gap:1px;">
+                    padding:4px;text-align:center;gap:1px;color:#111111;">
           {price_hdr}
           {price_html}
           {sub_right}
@@ -303,20 +303,20 @@ def render_label_html(item, cfg):
       </div>
       <!-- Date / UPC row -->
       <div style="display:flex;border-top:1px solid #ddd;font-size:9px;
-                  padding:2px 4px;min-height:14px;">
-        <div style="width:38%;color:#555;text-align:center;">
+                  padding:2px 4px;min-height:14px;color:#111111;">
+        <div style="width:38%;color:#555555;text-align:center;">
           {''+d['date_lbl'] if cfg['show_date'] else ''}
         </div>
-        <div style="width:62%;text-align:center;color:#555;">{detail_str}</div>
+        <div style="width:62%;text-align:center;color:#555555;">{detail_str}</div>
       </div>
       <!-- Description / barcode row -->
       <div style="display:flex;border-top:1px solid #555;padding:2px 4px;
-                  min-height:16px;align-items:center;">
-        <div style="width:60%;font-size:9px;font-weight:bold;">
+                  min-height:16px;align-items:center;color:#111111;">
+        <div style="width:60%;font-size:9px;font-weight:bold;color:#111111;">
           {(d['desc'][:30] + ('&nbsp;' + badges if badges else '')) if cfg['show_description'] else (badges if badges else '')}
         </div>
         <div style="width:40%;text-align:right;font-size:9px;
-                    letter-spacing:-1.5px;color:#333;">
+                    letter-spacing:-1.5px;color:#333333;">
           {'▌▌▌▏▌▌▌▌▌▏▌▌▌▌▌' if cfg['show_barcode'] else ''}
         </div>
       </div>
