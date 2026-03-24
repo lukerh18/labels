@@ -15,7 +15,7 @@ from label_engine import (
 
 # ── Page setup ────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="NY Price Label Generator",
+    page_title="Label Generator for Markt POS",
     page_icon="🏷️",
     layout="wide",
 )
@@ -62,7 +62,7 @@ st.write('')
 #  STEP 1  —  Upload
 # ═════════════════════════════════════════════════════════════════════════════
 if step == 1:
-    st.title('Upload your CSV exports')
+    st.title('Label Generator for Markt POS')
     st.markdown(
         'Each file becomes its own tab in the final workbook. '
         'Files must be exports from your POS system in the standard column format.'
