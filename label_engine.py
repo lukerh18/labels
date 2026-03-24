@@ -313,8 +313,7 @@ def render_label_html(item, cfg):
       <div style="display:flex;border-top:1px solid #555;padding:2px 4px;
                   min-height:16px;align-items:center;">
         <div style="width:60%;font-size:9px;font-weight:bold;">
-          {''+d['desc'][:30] if cfg['show_description'] else ''}
-          {'&nbsp;' + badges if badges else ''}
+          {(d['desc'][:30] + ('&nbsp;' + badges if badges else '')) if cfg['show_description'] else (badges if badges else '')}
         </div>
         <div style="width:40%;text-align:right;font-size:9px;
                     letter-spacing:-1.5px;color:#333;">
