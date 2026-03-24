@@ -1,5 +1,5 @@
 """
-NY Price Label Generator  —  3-step wizard
+Label Generator for Markt POS  —  3-step wizard
   Step 1: Upload CSV exports
   Step 2: Configure label layout & fields
   Step 3: Preview with real data → Generate & Download
@@ -29,7 +29,7 @@ defaults = dict(
     custom_w=2.0, custom_h=1.0,
     # field toggles
     show_unit_price=True, show_uom=True, show_date=True,
-    show_special=False, show_multibuy=True, show_item_num=True,
+    show_special=True, show_multibuy=True, show_item_num=True,
     show_upc=True, show_size=True, show_pack=True,
     show_desc=True, show_barcode=True,
     show_snap=True, show_wic=True,
@@ -121,32 +121,31 @@ elif step == 2:
     # ── Label size ─────────────────────────────────────────────────────────────
     st.subheader('📐  Label stock size')
 
+    # Make size buttons tall and card-like
+    st.markdown("""
+    <style>
+    div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]
+        div[data-testid="stButton"] > button {
+        min-height: 80px;
+        white-space: pre-wrap;
+        line-height: 1.5;
+        font-size: 13px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     preset_names = list(SIZE_PRESETS.keys())
-    n_cols = len(preset_names)
-    size_cols = st.columns(n_cols)
+    size_cols = st.columns(len(preset_names))
     for i, name in enumerate(preset_names):
         dims = SIZE_PRESETS[name]
         with size_cols[i]:
             active = (st.session_state.preset_name == name)
-            bg   = '#FF8000' if active else '#f5f5f5'
-            fg   = 'white'   if active else '#333'
-            bdr  = '#FF8000' if active else '#ddd'
+            short  = name.split('—')[0].strip()
             if dims:
-                ratio_w = int(dims[0] * 30)
-                ratio_h = int(dims[1] * 30)
-                size_vis = f'<div style="width:{ratio_w}px;height:{ratio_h}px;border:2px solid {fg};margin:4px auto;opacity:0.7"></div>'
-                caption  = f'{dims[0]}" × {dims[1]}"'
+                btn_label = f'{short}\n{dims[0]}" × {dims[1]}"'
             else:
-                size_vis = '<div style="font-size:18px;text-align:center;margin:4px">✏️</div>'
-                caption  = 'Enter below'
-            st.markdown(
-                f'<div style="background:{bg};color:{fg};border:2px solid {bdr};'
-                f'border-radius:8px;padding:8px;text-align:center;font-size:12px">'
-                f'{size_vis}<b>{name.split("—")[0].strip()}</b><br>'
-                f'<span style="opacity:0.85">{caption}</span></div>',
-                unsafe_allow_html=True
-            )
-            if st.button('Select', key=f'sz_{i}',
+                btn_label = f'{short}\nEnter dimensions below'
+            if st.button(btn_label, key=f'sz_{i}',
                          type='primary' if active else 'secondary',
                          use_container_width=True):
                 st.session_state.preset_name = name
@@ -261,7 +260,7 @@ elif step == 3:
         for i, item in enumerate(all_items):
             with prev_cols[i % 4]:
                 html = render_label_html(item, cfg)
-                st.markdown(html, unsafe_allow_html=True)
+                st.html(html)
                 st.write('')
     else:
         st.warning('No items to preview — check your upload.')
