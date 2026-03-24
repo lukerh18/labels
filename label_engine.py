@@ -295,9 +295,13 @@ def render_label_html(item, cfg):
     if cfg['show_uom']:
         orange_lines.append(f'<span style="font-size:{fpx(8)};color:#ffffff">{d["uom"]}</span>')
 
+    # Fixed physical height — font size changes content, not the box dimensions
+    preview_h = max(72, round(cfg['label_height_in'] * 108))
+
     html = f"""
     <div style="font-family:Arial,sans-serif;font-size:{fpx(11)};border:2px solid #444444;
-                width:100%;display:flex;flex-direction:column;min-height:80px;
+                width:100%;height:{preview_h}px;overflow:hidden;
+                display:flex;flex-direction:column;
                 background:#ffffff;color:{text_color};">
       <!-- Top: orange box + price area -->
       <div style="display:flex;flex:1;">
