@@ -1,6 +1,6 @@
 """
-label_engine.py  —  NY Price Label Generator core
---------------------------------------------------
+label_engine.py  —  Label Generator core
+-----------------------------------------
 Public API:
   build_config(**kwargs)  →  config dict
   generate_workbook(csv_files, cfg)  →  (Workbook, summary)
